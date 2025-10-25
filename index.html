@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#667eea">
+  <meta name="description" content="Salva e sincronizza i tuoi link preferiti">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon128.png">
+  <link rel="apple-touch-icon" href="icon128.png">
+  <title>Link Saver</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .header .subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    #user-profile {
+      font-size: 13px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #user-profile img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+
+    #logout-btn {
+      color: white;
+      background: rgba(255,255,255,0.2);
+      padding: 5px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .install-prompt {
+      background: #4CAF50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    
+    .install-prompt.show {
+      display: flex;
+    }
+    
+    .install-btn {
+      background: white;
+      color: #4CAF50;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    #login-view {
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    #login-view h1 {
+      color: #444;
+    }
+    
+    #login-view p {
+      color: #666;
+      margin: 10px 0 20px 0;
+    }
+
+    #login-btn {
+      max-width: 300px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #login-btn img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      background: white;
+      border-radius: 12px;
+      padding: 5px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      font-size: 14px;
+      color: #666;
+      border-radius: 8px;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+    
+    .tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    input[type="text"],
+    input[type="url"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+    
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+      margin-top: 10px;
+    }
+    
+    .btn-danger {
+      background: #ff4757;
+      color: white;
+      margin-top: 10px;
+    }
+    
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-align: center;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+    
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .search-box {
+      margin-bottom: 16px;
+    }
+    
+    .search-box input {
+      padding-left: 40px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 12px center;
+    }
+    
+    .stats {
+      background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: #667eea;
+    }
+    
+    .links-list {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    
+    .link-item {
+      background: #f8f9fa;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border-left: 4px solid #667eea;
+      transition: transform 0.2s;
+    }
+    
+    .link-item:active {
+      transform: scale(0.98);
+    }
+    
+    .link-url {
+      font-weight: 600;
+      color: #667eea;
+      word-break: break-all;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: block;
+      text-decoration: none;
+    }
+    
+    .link-url:hover {
+      text-decoration: underline;
+    }
+    
+    .link-date {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    
+    .link-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    
+    .tag {
+      background: #667eea;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .link-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+    
+    .btn-delete {
+      background: #ff4757;
+      color: white;
+    }
+    
+    .btn-delete:active {
+      transform: scale(0.95);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+    
+    .empty-state svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+    
+    .share-container {
+      margin-top: 20px;
+    }
+    
+    .share-btn {
+      background: #2196F3;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .group-header {
+      font-size: 16px;
+      font-weight: 700;
+      color: #667eea;
+      padding: 16px 0 10px 0;
+      margin-top: 12px;
+      border-bottom: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-header:first-child {
+      margin-top: 0;
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .header h1 {
+        font-size: 20px;
+      }
+      
+      .tab {
+        font-size: 13px;
+        padding: 10px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Schermata di Login -->
+  <div id="login-view" class="container">
+    <br><br>
+    <h1 style="color: #444;">🔖 Link Saver</h1>
+    <p style="color: #666; margin: 10px 0 20px 0;">Accedi per salvare e gestire i tuoi link.</p>
+    
+    <div id="login-message" class="message hidden"></div>
+
+    <button id="login-btn" class="btn btn-primary" style="max-width: 300px; display: inline-flex; align-items: center; justify-content: center; gap: 10px;">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4Ij4KICA8cGF0aCBmaWxsPSIjRkZDMTEwIiBkPSJNMzQuNDggMjQuNzJjMC0xLjU0LS4xMy0yLjk4LS4zNi00LjMyaC05LjM2djguMjhoNS4yNmMtLjIyIDEuNTYtMS4yMSAyLjg4LTIuNjQgMy44djUuMzZoNi44OGMyLjY0LTIuNDQgNC4yNC02LjEyIDQuMjQtMTAuOHoiLz4KICA8cGF0aCBmaWxsPSIjRkY2MzQ3IiBkPSJNMjQuNzIgNDMuMnYtOC4yOGg4LjI4bC04LjI4IDguMjgiLz4KICA8cGF0aCBmaWxsPSIjNEFBNDgwIiBkPSJNMjQuNzIgNC44YzQuNTYgMCA4LjQ0IDIuMjggMTAuOCA1Ljc2bC02Ljg4IDUuMzZjLTEuODgtMS40OC00LjQ0LTIuMzYtNy4yLTIuMzYtNS40IDAtMTAuMDQgMy44OC0xMS42NCA5LjEybC03LjItNS4zNkM3LjQ0IDEyLjEyIDE1LjQgNC44IDI0LjcyIDQuOHoiLz4KICA8cGF0aCBmaWxsPSIjMTg4MEVGIiBkPSJNMCAyNC43MmgxMy4wOGMtLjY0IDQuNDQgMy4yOCggOC4yOCA3LjIgOC4yOEwyNC43MiA0My4yQzE1LjQgNDMuMiA3LjQ0IDM2LjEyIDQuNTYgMjguNTZ6Ii8+Cjwvc3ZnPgo=" alt="Google icon">
+      <span>Accedi con Google</span>
+    </button>
+  </div>
+
+  <!-- Applicazione Principale (nascosta) -->
+  <div id="main-app" class="hidden">
+    <div class="install-prompt" id="installPrompt">
+      <span>📱 Installa Link Saver sul tuo dispositivo</span>
+      <button class="install-btn" id="installBtn">Installa</button>
+    </div>
+
+    <div class="header">
+      <h1>🔖 Link Saver</h1>
+      <div id="user-profile" class="hidden">
+        <img id="user-avatar" src="" alt="User avatar">
+        <span id="user-email"></span>
+        <a href="#" id="logout-btn">Logout</a>
+      </div>
+      <p class="subtitle">Salva e sincronizza i tuoi link ovunque</p>
+    </div>
+    
+    <div class="container">
+      <div class="tabs">
+        <button class="tab active" data-tab="save">💾 Salva</button>
+        <button class="tab" data-tab="view">📋 Visualizza</button>
+        <button class="tab" data-tab="manage">⚙️ Gestisci</button>
+      </div>
+      
+      <!-- TAB SALVA -->
+      <div id="save-tab" class="tab-content active">
+        <div class="card">
+          <div id="save-message" class="message hidden"></div>
+          
+          <form id="save-form">
+            <div class="form-group">
+              <label for="url">🔗 URL</label>
+              <input type="url" id="url" required placeholder="https://esempio.com">
+            </div>
+            
+            <div class="form-group">
+              <label for="date">📅 Data</label>
+              <input type="date" id="date" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="tags">🏷️ Parole chiave (separate da virgola)</label>
+              <textarea id="tags" placeholder="es: tutorial, javascript, programmare"></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">💾 Salva Link</button>
+          </form>
+          
+          <div class="share-container" id="shareContainer" style="display: none;">
+            <button class="btn btn-primary share-btn" id="shareBtn">
+              <span>📤</span>
+              <span>Condividi da altra app</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TAB VISUALIZZA -->
+      <div id="view-tab" class="tab-content">
+        <div class="card">
+          <div class="stats">
+            Link salvati: <span id="link-count">0</span>
+          </div>
+          
+          <div class="form-group search-box">
+            <input type="text" id="search" placeholder="Cerca per URL o tag...">
+          </div>
+          
+          <div id="links-container" class="links-list">
+            <div class="empty-state">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <p>Nessun link salvato</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TAB GESTISCI -->
+      <div id="manage-tab" class="tab-content">
+        <div class="card">
+          <div id="manage-message" class="message hidden"></div>
+          
+          <div class="stats">
+            Link totali: <span id="total-count">0</span>
+          </div>
+          
+          <h3 style="margin-bottom: 16px; font-size: 18px; color: #333;">📦 Import/Export</h3>
+          
+          <button id="export-btn" class="btn btn-secondary">📥 Esporta Dati (JSON)</button>
+          
+          <div class="form-group" style="margin-top: 20px;">
+            <label for="import-file">📤 Importa Dati</label>
+            <input type="file" id="import-file" accept=".json" style="padding: 10px; border: 2px dashed #ddd; border-radius: 8px;">
+          </div>
+          
+          <button id="import-btn" class="btn btn-secondary">Importa File</button>
+          
+          <h3 style="margin: 30px 0 16px; font-size: 18px; color: #333;">🗑️ Cancella Dati</h3>
+          
+          <button id="clear-btn" class="btn btn-danger">Cancella Tutti i Dati</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
