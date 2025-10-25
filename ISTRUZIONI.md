@@ -12,73 +12,69 @@ L'app si aprirà automaticamente con l'URL già compilato, pronto per essere sal
 
 ## 2. Configurazione di Firebase
 
-Per far funzionare il salvataggio online, devi creare un progetto su Firebase e inserire le tue credenziali personali nel file `app.js`.
+Per far funzionare il salvataggio online, devi creare un progetto su Firebase e configurare l'autenticazione.
 
 **Passaggi:**
 
 1.  **Vai alla [Firebase Console](https://console.firebase.google.com/)** e accedi con il tuo account Google.
-2.  **Crea un nuovo progetto:** Clicca su "**+ Aggiungi progetto**", inserisci un nome e segui i passaggi. Puoi disabilitare Google Analytics se non ti serve.
+2.  **Crea un nuovo progetto:** Clicca su "**+ Aggiungi progetto**", inserisci un nome e segui i passaggi.
 3.  **Aggiungi un'app Web:**
     *   Nella dashboard del progetto, clicca sull'icona Web (`</>`).
-    *   Dai un nome alla tua app (es. "Link Saver") e clicca su **Registra app**.
-4.  **Copia la configurazione:** Firebase ti mostrerà un oggetto `firebaseConfig`. **Copialo**.
-5.  **Incolla in `app.js`:** Apri `app.js` e sostituisci l'oggetto `firebaseConfig` segnaposto con quello che hai appena copiato.
-6.  **Abilita l'Autenticazione Anonima:**
+    *   Dai un nome alla tua app e clicca su **Registra app**.
+4.  **Copia la configurazione:** Firebase ti mostrerà un oggetto `firebaseConfig`. **Copialo** e incollalo in cima al file `app.js`, sostituendo quello esistente.
+5.  **Abilita l'Autenticazione con Google:**
     *   Nel menu a sinistra, vai su **Build > Authentication**.
-    *   Clicca su **Inizia** e vai sulla scheda **Metodi di accesso**.
-    *   Seleziona **Anonimo**, abilitalo e salva.
-7.  **Abilita il Database Firestore:**
-    *   Nel menu a sinistra, vai su **Build > Firestore Database**.
-    *   Clicca su **Crea database**.
-    *   Scegli **Inizia in modalità di produzione** e clicca **Avanti**.
-    *   Scegli una località e clicca **Abilita**.
-8.  **Imposta le Regole di Sicurezza:**
-    *   Vai nella scheda **Regole** di Firestore.
-    *   Sostituisci il contenuto con le seguenti regole e clicca su **Pubblica**:
-    ```
-    rules_version = '2';
-    service cloud.firestore {
-      match /databases/{database}/documents {
-        match /users/{userId}/{document=**} {
-          allow read, write: if request.auth != null && request.auth.uid == userId;
-        }
-      }
-    }
-    ```
+    *   Clicca su **Inizia** e vai sulla scheda **Sign-in method** (o Metodi di accesso).
+    *   Seleziona **Google** dalla lista dei provider, **abilitalo** e fornisci un'email di supporto per il progetto. Salva.
+    *   Assicurati che il provider **Anonimo** sia disabilitato.
 
-## 3. Pubblicazione su GitHub Pages
+## 3. Limitare l'Accesso (Lista Utenti Autorizzati)
+
+Per limitare l'accesso solo a specifici account Google, devi modificare una lista all'interno del codice.
+
+1.  **Apri il file `app.js`**.
+2.  In cima al file, troverai un array chiamato `allowedEmails`.
+3.  **Modifica questo array** per aggiungere o rimuovere gli indirizzi email (in minuscolo) che vuoi autorizzare.
+
+```javascript
+// Esempio
+const allowedEmails = [
+  'utente1@gmail.com',
+  'utente2@example.com'
+];
+```
+
+## 4. Pubblicazione su GitHub Pages
 
 Per rendere la tua PWA accessibile a tutti, puoi pubblicarla gratuitamente su GitHub Pages.
 
-**Prerequisiti:**
+**Passaggi Iniziali:**
+
 *   Avere [Git](https://git-scm.com/downloads) installato.
 *   Avere un account su [GitHub](https://github.com/).
 
-**Passaggi:**
+**Procedura:**
 
 1.  **Crea un nuovo repository su GitHub:**
-    *   Vai su GitHub e clicca su "New repository".
-    *   Dagli un nome (es. `link-saver-pwa`), assicurati che sia **Pubblico** e crea il repository senza aggiungere file (come README o .gitignore).
-2.  **Inizializza Git nel tuo progetto locale:**
-    *   Apri un terminale nella cartella del tuo progetto (`C:\Users\User\Documents\ProgettiGoogleCLI\link-saver-extension-pwa`).
-    *   Esegui questi comandi uno per uno:
+    *   Vai su GitHub e crea un **nuovo repository pubblico**.
+2.  **Inizializza Git e carica i file:**
+    *   Apri un terminale nella cartella del tuo progetto.
+    *   Esegui questi comandi per collegare il progetto a GitHub e caricare i file (sostituisci l'URL con quello del tuo repository):
     ```bash
     git init
     git add .
     git commit -m "Prima versione"
-    ```
-3.  **Collega il repository locale a GitHub:**
-    *   Esegui il comando che trovi nella pagina del tuo repository GitHub sotto la sezione "...or push an existing repository from the command line". Sarà simile a questo (sostituisci con il tuo URL):
-    ```bash
-    git remote add origin https://github.com/TUO_NOME_UTENTE/link-saver-pwa.git
+    git remote add origin https://github.com/TUO_NOME_UTENTE/NOME_REPO.git
     git branch -M main
     git push -u origin main
     ```
-4.  **Abilita GitHub Pages:**
+3.  **Abilita GitHub Pages:**
     *   Nel tuo repository su GitHub, vai su **Settings > Pages**.
-    *   Nella sezione "Branch", seleziona `main` come branch sorgente e lascia la cartella su `/ (root)`.
-    *   Clicca su **Save**.
-5.  **Attendi la pubblicazione:**
-    *   Dopo qualche minuto, il tuo sito sarà online all'indirizzo `https://TUO_NOME_UTENTE.github.io/link-saver-pwa/`.
+    *   Nella sezione "Branch", seleziona `main` e clicca su **Save**.
+4.  **Autorizza il dominio su Firebase:**
+    *   Dopo aver pubblicato il sito, GitHub ti darà un URL tipo `https://TUO_NOME_UTENTE.github.io/NOME_REPO/`.
+    *   **Copia il dominio base**, che è `TUO_NOME_UTENTE.github.io`.
+    *   Torna sulla **Console di Firebase > Authentication > Settings > Domains**.
+    *   Clicca su **Add domain** e incolla il dominio che hai copiato (es: `tuo-nome-utente.github.io`).
 
-Ora hai tutte le istruzioni in un unico posto!
+Dopo qualche minuto, il tuo sito sarà online e funzionante all'indirizzo fornito da GitHub.
