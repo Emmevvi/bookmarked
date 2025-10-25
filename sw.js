@@ -63,9 +63,10 @@ self.addEventListener('fetch', event => {
     url.hostname.includes('firebaseio.com') ||
     url.hostname.includes('googleapis.com') ||
     url.hostname.includes('gstatic.com') ||
-    url.hostname.includes('firestore.googleapis.com')
+    url.hostname.includes('firestore.googleapis.com') ||
+    url.pathname.endsWith('/manifest.json')
   ) {
-    // Network only per Firebase
+    // Network only per Firebase e manifest
     event.respondWith(fetch(event.request));
     return;
   }

@@ -147,14 +147,14 @@ async function handleShare() {
 }
 
 // Gestione Share Target
-if (window.location.search.includes('share-target')) {
+window.addEventListener('load', () => {
   const params = new URLSearchParams(window.location.search);
   const sharedUrl = params.get('url') || params.get('text');
   if (sharedUrl) {
     document.getElementById('url').value = sharedUrl;
     switchTab('save');
   }
-}
+});
 
 // Listener in tempo reale per sincronizzazione automatica
 function startRealtimeListener() {
