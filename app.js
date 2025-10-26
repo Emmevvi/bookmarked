@@ -8,12 +8,6 @@ const firebaseConfig = {
   appId: "1:953086575969:web:96c7dfca7548b2e3733120"
 };
 
-// Lista di email autorizzate (in minuscolo)
-const allowedEmails = [
-  's.mastellone@gmail.com',
-  'eccolamiamail@gmail.com'
-];
-
 // Inizializza Firebase
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -39,16 +33,10 @@ const loginMessage = document.getElementById('login-message');
 // Gestione stato autenticazione
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Utente loggato, controlla se è autorizzato
-    if (allowedEmails.includes(user.email.toLowerCase())) {
-      currentUser = user;
-      uiForLoggedIn();
-      startRealtimeListener();
-    } else {
-      // Utente non autorizzato
-      showMessage('login-message', 'Accesso non autorizzato per questa email.', 'error');
-      signOut(auth); // Disconnetti immediatamente
-    }
+    // Utente loggato. Le Regole di Sicurezza di Firestore gestiranno l'autorizzazione.
+    currentUser = user;
+    uiForLoggedIn();
+    startRealtimeListener();
   } else {
     // Utente non loggato
     currentUser = null;

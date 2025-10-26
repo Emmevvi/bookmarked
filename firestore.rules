@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Definisci la lista di email autorizzate qui
+    function isAllowedUser() {
+      let allowedEmails = [
+        's.mastellone@gmail.com',
+        'eccolamiamail@gmail.com'
+      ];
+      return request.auth.token.email_verified && 
+             request.auth.token.email in allowedEmails;
+    }
+
+    // Applica la regola alla collezione degli utenti
+    // Consenti lettura e scrittura solo se l'utente è autenticato,
+    // il suo UID corrisponde al percorso che sta cercando di accedere,
+    // e la sua email è nella lista delle email permesse.
+    match /users/{userId}/{documents=**} {
+      allow read, write: if request.auth != null && 
+                          request.auth.uid == userId &&
+                          isAllowedUser();
+    }
+  }
+}
